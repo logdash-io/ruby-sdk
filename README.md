@@ -55,6 +55,22 @@ metrics.set('users', 0)
 metrics.mutate('users', 1)
 ```
 
+## Ruby on Rails
+
+In a Ruby on Rails application, you can use an initializer to configure Logdash. Create a new file in `config/initializers/logdash.rb` with the following content:
+
+```ruby
+require 'logdash'
+
+ActiveSupport.on_load(:after_initialize) do
+  $logdash_client = Logdash.create(api_key: "YOUR_API_KEY")
+  $logger = $logdash_client[:logger]
+  $metrics = $logdash_client[:metrics]
+end
+```
+
+This will make `$logger` and `$metrics` available throughout your Ruby on Rails application.
+
 ## View
 
 To see the logs or metrics, go to your project dashboard.
