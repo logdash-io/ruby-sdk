@@ -8,7 +8,9 @@ puts
 
 # Example with API key (sends data to LogDash servers)
 puts '--- With API Key Example ---'
-logdash = Logdash.create(api_key: ENV['LOGDASH_API_KEY'] || 'YOUR_API_KEY_HERE', verbose: true)
+api_key = ENV['LOGDASH_API_KEY'] || 'YOUR_API_KEY_HERE'
+puts "Using API Key: #{api_key}"
+logdash = Logdash.create(api_key: api_key, verbose: true)
 logger = logdash[:logger]
 metrics = logdash[:metrics]
 
