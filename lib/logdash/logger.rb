@@ -40,6 +40,7 @@ module Logdash
     end
 
     alias log info
+    alias warn warning
 
     private
 
@@ -60,7 +61,7 @@ module Logdash
 
     def default_prefix_proc
       lambda do |level|
-        timestamp = colorize("[#{Time.now.utc.iso8601}]", Logdash::Types::LogLevel::SILLY)
+        timestamp = colorize("[#{Time.now.utc.strftime('%Y-%m-%dT%H:%M:%SZ')}]", Logdash::Types::LogLevel::SILLY)
         level_tag = colorize("[#{level.to_s.upcase}]", level)
         "#{timestamp} #{level_tag} "
       end
