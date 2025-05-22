@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    logdash (1.0.0)
-      json
+    logdash (1.0.2)
+      json (~> 2.0)
 
 GEM
   remote: https://rubygems.org/
@@ -15,6 +15,7 @@ GEM
       bigdecimal
       rexml
     diff-lcs (1.6.2)
+    docile (1.4.1)
     hashdiff (1.2.0)
     json (2.12.0)
     language_server-protocol (3.17.0.5)
@@ -71,6 +72,12 @@ GEM
     rubocop-rspec_rails (2.29.1)
       rubocop (~> 1.61)
     ruby-progressbar (1.13.0)
+    simplecov (0.22.0)
+      docile (~> 1.1)
+      simplecov-html (~> 0.11)
+      simplecov_json_formatter (~> 0.1)
+    simplecov-html (0.13.1)
+    simplecov_json_formatter (0.1.4)
     timecop (0.9.10)
     unicode-display_width (3.1.4)
       unicode-emoji (~> 4.0, >= 4.0.4)
@@ -85,14 +92,15 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler
+  bundler (~> 2.0)
   logdash!
   rake (~> 13.0)
   rspec (~> 3.0)
   rubocop (~> 1.62)
   rubocop-rspec (~> 2.25)
-  timecop
-  webmock
+  simplecov (~> 0.22)
+  timecop (~> 0.9)
+  webmock (~> 3.18)
 
 BUNDLED WITH
-   2.6.6
+   2.6.9

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'time'
 
 module Logdash
   module Types
@@ -59,19 +60,26 @@ module Logdash
       "\e[38;2;#{rgb[0]};#{rgb[1]};#{rgb[2]}m#{text}\e[0m"
     end
 
+    def iso8601_timestamp
+      Time.now.utc.strftime('%Y-%m-%dT%H:%M:%S.%3NZ')
+    end
+
     def default_prefix_proc
-      lambda do |level|
-        timestamp = colorize("[#{Time.now.utc.strftime('%Y-%m-%dT%H:%M:%SZ')}]", Logdash::Types::LogLevel::SILLY)
+      lambda do |level, timestamp|
+        timestamp = colorize("[#{timestamp}]", Logdash::Types::LogLevel::SILLY)
         level_tag = colorize("[#{level.to_s.upcase}]", level)
         "#{timestamp} #{level_tag} "
       end
     end
 
     def _log(level, message)
-      prefix = @prefix_proc.call(level)
+      timestamp = iso8601_timestamp
+      prefix = @prefix_proc.call(level, timestamp)
+
       puts "#{prefix}#{message}"
+
       @on_log_proc&.call(level, message)
-      @log_sync&.send(message, level, Time.now.utc)
+      @log_sync&.send(message, level, timestamp)
     end
   end
 end
