@@ -77,6 +77,14 @@ RSpec.describe Logdash::Logger do
       end
     end
 
+    describe '#iso8601_timestamp' do
+      it 'returns a formatted timestamp' do
+        Timecop.freeze(Time.utc(2024, 1, 1, 12, 0, 0)) do
+          expect(logger.send(:iso8601_timestamp)).to eq('2024-01-01T12:00:00Z')
+        end
+      end
+    end
+
     describe '#default_prefix_proc' do
       it 'returns a proc' do
         expect(logger.send(:default_prefix_proc)).to be_a(Proc)
@@ -84,7 +92,7 @@ RSpec.describe Logdash::Logger do
 
       it 'proc returns a formatted string with timestamp and level' do
         Timecop.freeze(Time.utc(2024, 1, 1, 12, 0, 0)) do
-          prefix = logger.send(:default_prefix_proc).call(Logdash::Types::LogLevel::INFO)
+          prefix = logger.send(:default_prefix_proc).call(Logdash::Types::LogLevel::INFO, '2024-01-01T12:00:00Z')
           expect(prefix).to eq(expected_formatted_prefix)
         end
       end

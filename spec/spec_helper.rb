@@ -4,6 +4,9 @@ require 'bundler/setup'
 require 'logdash'
 require 'timecop'
 require 'webmock/rspec'
+require 'simplecov'
+
+SimpleCov.start
 
 RSpec.configure do |config|
   config.example_status_persistence_file_path = '.rspec_status'

@@ -25,14 +25,15 @@ Gem::Specification.new do |spec|
   spec.executables   = []
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'json'
+  spec.add_dependency 'json', '~> 2.0'
 
-  spec.add_development_dependency 'bundler'
+  spec.add_development_dependency 'bundler', '~> 2.0'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'rubocop', '~> 1.62'
   spec.add_development_dependency 'rubocop-rspec', '~> 2.25'
-  spec.add_development_dependency 'timecop'
-  spec.add_development_dependency 'webmock'
+  spec.add_development_dependency 'simplecov', '~> 0.22'
+  spec.add_development_dependency 'timecop', '~> 0.9'
+  spec.add_development_dependency 'webmock', '~> 3.18'
   spec.metadata['rubygems_mfa_required'] = 'true'
 end
