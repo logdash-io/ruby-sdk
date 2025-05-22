@@ -71,10 +71,6 @@ end
 
 This will make `$logger` and `$metrics` available throughout your Ruby on Rails application.
 
-## View
-
-To see the logs or metrics, go to your project dashboard.
-
 ## Configuration
 
 | Parameter | Required | Default | Description                                                                                                              |
