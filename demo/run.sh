@@ -9,7 +9,7 @@ echo
 echo "Running LogDash demo..."
 echo
 docker run --rm -it \
-  -e LOGDASH_API_KEY="${LOGDASH_API_KEY:-YOUR_API_KEY_HERE}" \
+  -e LOGDASH_API_KEY="${LOGDASH_API_KEY}" \
   logdash-demo
 
 echo

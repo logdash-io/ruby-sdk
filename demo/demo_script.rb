@@ -11,7 +11,7 @@ logdash_version = Gem.loaded_specs['logdash']&.version || 'unknown'
 puts "Using logdash gem version: #{logdash_version}"
 puts
 
-api_key = ENV['LOGDASH_API_KEY'] || 'YOUR_API_KEY_HERE'
+api_key = ENV['LOGDASH_API_KEY']
 puts "Using API Key: #{api_key}"
 logdash = Logdash.create(api_key: api_key, verbose: true)
 logger = logdash[:logger]
