@@ -20,16 +20,6 @@ metrics.set('demo_users', 42)
 metrics.mutate('demo_counter', 1)
 puts
 
-# Example without API key (logs to console only)
-puts '--- Without API Key Example (Local Console Only) ---'
-local_logdash = Logdash.create(verbose: true)
-local_logger = local_logdash[:logger]
-
-local_logger.info('Local info log')
-local_logger.warn('Local warning log')
-local_logger.debug('Local debug log')
-puts
-
 puts 'Demo completed!'
 
 # Sleep for 1 second at the end
