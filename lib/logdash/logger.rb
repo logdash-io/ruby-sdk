@@ -61,7 +61,7 @@ module Logdash
     end
 
     def iso8601_timestamp
-      Time.now.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+      Time.now.utc.strftime('%Y-%m-%dT%H:%M:%S.%3NZ')
     end
 
     def default_prefix_proc
