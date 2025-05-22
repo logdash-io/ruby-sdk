@@ -2,7 +2,9 @@ FROM ruby:3.2-alpine
 
 WORKDIR /app
 
-# Install the logdash gem from RubyGems
+# Add --no-cache-dir to prevent gem caching
+# Add a cache-busting argument to force re-installation when building
+ARG CACHEBUST=1
 RUN gem install logdash
 
 # Copy demo script

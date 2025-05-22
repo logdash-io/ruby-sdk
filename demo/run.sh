@@ -3,7 +3,8 @@ set -e
 
 cd "$(dirname "$0")/.."
 echo "Building LogDash demo Docker image (using published gem)..."
-docker build -t logdash-demo -f demo/Dockerfile .
+# Force a complete rebuild with --no-cache
+docker build --no-cache -t logdash-demo -f demo/Dockerfile .
 
 echo
 echo "Running LogDash demo..."
