@@ -6,7 +6,7 @@ require 'logdash'
 seed = ENV.fetch('LOGDASH_SEED')
 puts "=== LogDash SDK Demo: logdash #{Logdash::VERSION}, seed #{seed} ==="
 
-logdash = Logdash.create(api_key: ENV.fetch('LOGDASH_API_KEY'), verbose: true)
+logdash = Logdash.create(api_key: ENV.fetch('LOGDASH_API_KEY'), app: 'ruby-sdk', verbose: true)
 logger = logdash[:logger]
 metrics = logdash[:metrics]
 

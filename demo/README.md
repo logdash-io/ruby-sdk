@@ -7,6 +7,7 @@ CI runs it after each release, and the `Check deployed package` workflow runs it
 LOGDASH_API_KEY=<ingest key> LOGDASH_PERSONAL_API_KEY=<personal key> ./demo/run.sh
 ```
 
-It sends with the ingest key and reads the logs and metric back with the personal key, an `ldp_` key with logs:read and metrics:read restricted to the same project.
+It sends with the ingest key and reads the logs and metric back with the personal key, an `ldp_` key with logs:read and metrics:read restricted to the same domain.
+The ingest key is the one shared by the "SDK smoke tests" domain, and the gem sends as the `ruby-sdk` app.
 `LOGDASH_VERSION=<version>` checks that version instead of the latest, and waits until RubyGems serves it.
 It needs Docker, curl and jq.

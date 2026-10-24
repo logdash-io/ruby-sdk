@@ -3,7 +3,7 @@
 # and reads them back from the API. Needs Docker, curl and jq.
 set -eu
 
-: "${LOGDASH_API_KEY:?must be the ingest key of the smoke-test project}"
+: "${LOGDASH_API_KEY:?must be the ingest key of the SDK smoke tests domain}"
 api=https://api.logdash.io
 seed=$(date +%s) # new every run, so the read-back finds what this run sent and nothing older
 
@@ -18,11 +18,12 @@ done
 
 docker run --rm -e LOGDASH_API_KEY -e LOGDASH_SEED="$seed" logdash-demo
 
-# A read-only personal key restricted to the smoke-test project, which whoami names.
+# A read-only personal key restricted to the smoke-test domain, which whoami names.
 auth="Authorization: Bearer ${LOGDASH_PERSONAL_API_KEY:-}"
 if ! whoami=$(curl -sS --fail-with-body -H "$auth" "$api/personal-api-keys/whoami") ||
-  ! project=$(printf '%s' "$whoami" | jq -er '.access | select(.kind == "projects" and (.ids | length) == 1) | .ids[0]'); then
-  echo "LOGDASH_PERSONAL_API_KEY must be a personal API key restricted to the smoke-test project. whoami: $whoami" >&2
+  ! domain=$(printf '%s' "$whoami" | jq -er '.access | select(.kind == "clusters" and (.ids | length) == 1) | .ids[0]'); then
+  access=$(printf '%s' "$whoami" | jq -c '.access' 2>/dev/null || echo 'no access in the response')
+  echo "LOGDASH_PERSONAL_API_KEY must be a personal API key restricted to the SDK smoke tests domain. Its access: $access" >&2
   exit 1
 fi
 
@@ -30,16 +31,16 @@ fi
 levels='["debug", "error", "http", "info", "silly", "verbose", "warning"]'
 logs='' metrics='' attempt=1
 until
-  logs=$(curl -sS --fail-with-body -G -H "$auth" --data-urlencode "searchString=$seed" -d limit=100 \
-    "$api/projects/$project/logs/v2") &&
-    metrics=$(curl -sS --fail-with-body -H "$auth" "$api/projects/$project/metrics") &&
+  logs=$(curl -sS --fail-with-body -G -H "$auth" --data-urlencode "searchString=$seed" -d apps=ruby-sdk -d limit=100 \
+    "$api/clusters/$domain/logs") &&
+    metrics=$(curl -sS --fail-with-body -H "$auth" "$api/clusters/$domain/metrics") &&
     printf '%s' "$logs" | jq -e --arg m "smoke test $seed" --argjson levels "$levels" \
-      '[.[] | select(.message == $m) | .level] | unique == $levels' >/dev/null &&
+      '[.[] | select(.app == "ruby-sdk" and .message == $m) | .level] | unique == $levels' >/dev/null &&
     printf '%s' "$metrics" | jq -e --argjson v "$((seed + 1))" \
-      'any(.[]; .name == "demo_users" and .value == $v)' >/dev/null
+      'any(.[]; .app == "ruby-sdk" and .name == "demo_users" and .value == $v)' >/dev/null
 do
   if [ "$attempt" -ge 30 ]; then
-    echo "Did not read back a log of every level and demo_users = $((seed + 1)); both keys must be of one project." >&2
+    echo "Did not read back a log of every level and demo_users = $((seed + 1)); both keys must be of one domain." >&2
     echo "Logs: $logs" >&2
     echo "Metrics: $metrics" >&2
     exit 1
