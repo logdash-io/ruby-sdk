@@ -55,6 +55,25 @@ metrics.set('users', 0)
 metrics.mutate('users', 1)
 ```
 
+## Events
+
+```ruby
+require 'logdash'
+
+logdash_client = Logdash.create(api_key: "YOUR_API_KEY")
+events = logdash_client[:events]
+
+events.track('agent_run', { agent: 'support', steps: 4, success: true }, user_id: current_user.id)
+```
+
+Events show up in your domain's Analytics as goals, with a daily trend.
+Pass `user_id` for signed-in users, so one person counts once across your website and apps.
+Without it, Logdash counts a visitor of that app that changes every day.
+Never put personal data in props.
+
+Events are sent in the background, and a script waits for them before it exits.
+Call `events.flush` to wait for them sooner, for example before a serverless function returns.
+
 ## Ruby on Rails
 
 In a Ruby on Rails application, you can use an initializer to configure Logdash. Create a new file in `config/initializers/logdash.rb` with the following content:
@@ -66,24 +85,25 @@ ActiveSupport.on_load(:after_initialize) do
   $logdash_client = Logdash.create(api_key: "YOUR_API_KEY")
   $logger = $logdash_client[:logger]
   $metrics = $logdash_client[:metrics]
+  $events = $logdash_client[:events]
 end
 ```
 
-This will make `$logger` and `$metrics` available throughout your Ruby on Rails application.
+This will make `$logger`, `$metrics` and `$events` available throughout your Ruby on Rails application.
 
 ## Configuration
 
-| Parameter | Required | Default | Description                                                                                                              |
-| --------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `api_key` | no       | -       | Api key used to authorize against logdash servers. If you don't provide one, logs will be logged into local console only |
-| `host`    | no       | `https://api.logdash.io` | Custom API host, useful with self-hosted instances                                                                       |
-| `verbose` | no       | `false` | Useful for debugging purposes                                                                                            |
-| `app`     | no       | -       | Name of the app sending logs and metrics. See [Apps](#apps)                                                              |
+| Parameter | Required | Default                  | Description                                                                                                     |
+| --------- | -------- | ------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `api_key` | no       | -                        | API key used to authorize against Logdash servers. Without one, logs and events print to the local console only |
+| `host`    | no       | `https://api.logdash.io` | Custom API host, useful with self-hosted instances                                                              |
+| `verbose` | no       | `false`                  | Useful for debugging purposes                                                                                   |
+| `app`     | no       | -                        | Name of the app sending logs, metrics and events. See [Apps](#apps)                                             |
 
 ### Apps
 
 A domain key is shared by all apps of a domain, for example a desktop app, an API and a landing page.
-`app` names the app this client runs in, so the dashboard can filter logs and metrics by app:
+`app` names the app this client runs in, so the dashboard can filter logs, metrics and events by app:
 
 ```ruby
 logdash_client = Logdash.create(api_key: "YOUR_DOMAIN_KEY", app: "api")

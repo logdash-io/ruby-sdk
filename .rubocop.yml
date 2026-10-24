@@ -1,4 +1,4 @@
-require:
+plugins:
   - rubocop-rspec
 
 AllCops:
@@ -10,15 +10,6 @@ AllCops:
     - "tmp/**/*"
     - "logdash-*.gem"
   SuggestExtensions: false
-
-Capybara:
-  Enabled: false
-
-FactoryBot:
-  Enabled: false
-
-Capybara/RSpec/PredicateMatcher:
-  Enabled: false
 
 Gemspec/DevelopmentDependencies:
   Enabled: false

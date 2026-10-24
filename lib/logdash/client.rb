@@ -3,10 +3,11 @@
 require_relative 'logger'
 require_relative 'metrics'
 require_relative 'http_log_sync'
+require_relative 'events'
 
 module Logdash
   class Client
-    attr_reader :logger, :metrics
+    attr_reader :logger, :metrics, :events
 
     def initialize(api_key: nil, host: 'https://api.logdash.io', verbose: false, app: nil)
       @api_key = api_key
@@ -18,11 +19,12 @@ module Logdash
       @logger = Logger.new(log_sync: log_sync_instance)
 
       @metrics = create_metrics(api_key, host, verbose, app)
+      @events = Events.new(api_key: api_key, host: host, verbose: verbose, app: app)
     end
 
     def self.create(api_key: nil, host: 'https://api.logdash.io', verbose: false, app: nil)
       client = new(api_key: api_key, host: host, verbose: verbose, app: app)
-      { logger: client.logger, metrics: client.metrics }
+      { logger: client.logger, metrics: client.metrics, events: client.events }
     end
 
     private
