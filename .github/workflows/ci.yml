@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # A release in progress must finish; a newer merge waits and releases after it.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+      - run: bundle exec rspec
+      - run: bundle exec rubocop
+      - run: gem build logdash.gemspec
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: node --test 'scripts/*.test.ts'
+
+  # The version the merged commits call for; empty when none of them is a feat, fix, perf, or breaking change.
+  version:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      next: ${{ steps.next.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the tags and commits since the last release
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      # The assignment fails the step when the script fails; inside echo the failure would vanish into an empty version.
+      - id: next
+        run: |
+          version=$(node scripts/version.ts)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  # Publishes the merge to RubyGems as its trusted publisher, with a short-lived OIDC token instead of an API key.
+  release:
+    needs: [test, version]
+    if: needs.version.outputs.next != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # the GitHub release and its tag
+      id-token: write # the OIDC token RubyGems exchanges for a push key
+    env:
+      V: ${{ needs.version.outputs.next }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+      # gem push fails if this wrote nothing: the gem then builds as another version than the file it pushes.
+      - run: sed -i "s/VERSION = '.*'/VERSION = '$V'/" lib/logdash/version.rb
+      - run: gem build logdash.gemspec
+      - uses: rubygems/configure-rubygems-credentials@v2.1.0
+      - run: gem push "logdash-$V.gem"
+      # Last, since it creates the v<version> tag version.ts counts from.
+      - run: gh release create "v$V" --generate-notes --target "$GITHUB_SHA"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  # The gem just published installs from RubyGems, and what it sends arrives.
+  smoke:
+    needs: [version, release]
+    uses: ./.github/workflows/check-deployed-package.yml
+    with:
+      version: ${{ needs.version.outputs.next }}
+    secrets: inherit
