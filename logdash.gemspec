@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.metadata['source_code_uri'] = 'https://github.com/logdash-io/ruby-sdk'
   spec.metadata['changelog_uri'] = 'https://github.com/logdash-io/ruby-sdk/releases'
 
-  spec.files = Dir.glob('lib/**/*.rb') + %w[LICENSE README.md CHANGELOG.md .rubocop.yml]
+  spec.files = Dir.glob('lib/**/*.rb') + %w[LICENSE README.md]
   spec.bindir        = 'exe'
   spec.executables   = []
   spec.require_paths = ['lib']

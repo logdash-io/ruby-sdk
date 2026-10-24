@@ -68,7 +68,8 @@ jobs:
       - run: sed -i "s/VERSION = '.*'/VERSION = '$V'/" lib/logdash/version.rb
       - run: gem build logdash.gemspec
       - uses: rubygems/configure-rubygems-credentials@v2.1.0
-      - run: gem push "logdash-$V.gem"
+      # Skipped when the version is already live, so a rerun after a failed release step still tags it.
+      - run: curl -fs "https://rubygems.org/api/v2/rubygems/logdash/versions/$V.json" >/dev/null || gem push "logdash-$V.gem"
       # Last, since it creates the v<version> tag version.ts counts from.
       - run: gh release create "v$V" --generate-notes --target "$GITHUB_SHA"
         env:
@@ -80,4 +81,6 @@ jobs:
     uses: ./.github/workflows/check-deployed-package.yml
     with:
       version: ${{ needs.version.outputs.next }}
-    secrets: inherit
+    secrets:
+      LOGDASH_API_KEY: ${{ secrets.LOGDASH_API_KEY }}
+      LOGDASH_PERSONAL_API_KEY: ${{ secrets.LOGDASH_PERSONAL_API_KEY }}
