@@ -23,10 +23,11 @@ module Logdash
   class Metrics
     include BaseMetrics
 
-    def initialize(api_key:, host:, verbose:)
+    def initialize(api_key:, host:, verbose:, app: nil)
       @api_key = api_key
       @host = host
       @verbose = verbose
+      @app = app
     end
 
     def set(name, value)
@@ -51,22 +52,23 @@ module Logdash
         http.open_timeout = 5
         http.read_timeout = 5
 
-        request = Net::HTTP::Put.new(uri.request_uri)
-        request['Content-Type'] = 'application/json'
-        request['project-api-key'] = @api_key
-        request.body = {
-          name: name,
-          value: value,
-          operation: operation
-        }.to_json
-
-        response = http.request(request)
+        response = http.request(build_request(uri, name, value, operation))
         puts "[LogDash BG] Sent metric (#{name}, op: #{operation}), status: #{response.code}" if @verbose
       rescue Net::OpenTimeout, Net::ReadTimeout => e
         puts "[LogDash BG] Timeout sending metric (#{name}): #{e.message}" if @verbose
       rescue StandardError => e
         puts "[LogDash BG] Error sending metric (#{name}): #{e.message}" if @verbose
       end
+    end
+
+    def build_request(uri, name, value, operation)
+      request = Net::HTTP::Put.new(uri.request_uri)
+      request['Content-Type'] = 'application/json'
+      request['project-api-key'] = @api_key
+      body = { name: name, value: value, operation: operation }
+      body[:app] = @app if @app && !@app.empty?
+      request.body = body.to_json
+      request
     end
   end
 

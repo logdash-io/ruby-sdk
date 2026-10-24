@@ -4,11 +4,12 @@ require 'spec_helper'
 require 'logdash/metrics'
 
 RSpec.describe Logdash::Metrics do
-  subject(:metrics) { described_class.new(api_key: api_key, host: host, verbose: verbose) }
+  subject(:metrics) { described_class.new(api_key: api_key, host: host, verbose: verbose, app: app) }
 
   let(:api_key) { 'test_api_key' }
   let(:host) { 'https://test.logdash.io' }
   let(:verbose) { false }
+  let(:app) { nil }
 
   before do
     stub_request(:put, "#{host}/metrics")
@@ -32,6 +33,34 @@ RSpec.describe Logdash::Metrics do
       expect(WebMock).to have_requested(:put, "#{host}/metrics")
         .with(body: { name: 'metric_name', value: 5, operation: Logdash::MetricOperation::CHANGE }.to_json,
               headers: { 'Content-Type' => 'application/json', 'project-api-key' => api_key }).once
+    end
+  end
+
+  it 'does not send app when it is not set' do
+    metrics.set('metric_name', 10)
+    sleep 0.1
+    expect(WebMock).to have_requested(:put, "#{host}/metrics")
+      .with { |request| !JSON.parse(request.body).key?('app') }.once
+  end
+
+  context 'when app is set' do
+    let(:app) { 'api' }
+
+    it 'sends app in the payload body' do
+      metrics.set('metric_name', 10)
+      sleep 0.1
+      expect(WebMock).to have_requested(:put, "#{host}/metrics").with(body: hash_including(app: 'api')).once
+    end
+  end
+
+  context 'when app is empty' do
+    let(:app) { '' }
+
+    it 'does not send app' do
+      metrics.set('metric_name', 10)
+      sleep 0.1
+      expect(WebMock).to have_requested(:put, "#{host}/metrics")
+        .with { |request| !JSON.parse(request.body).key?('app') }.once
     end
   end
 
