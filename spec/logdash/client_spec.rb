@@ -27,14 +27,32 @@ RSpec.describe Logdash::Client do
         http_log_sync = class_spy(Logdash::HttpLogSync)
         stub_const('Logdash::HttpLogSync', http_log_sync)
         client
-        expect(http_log_sync).to have_received(:new).with(api_key: api_key, host: host, verbose: true)
+        expect(http_log_sync).to have_received(:new).with(api_key: api_key, host: host, verbose: true, app: nil)
       end
 
       it 'passes verbose true to Metrics' do
         metrics = class_spy(Logdash::Metrics)
         stub_const('Logdash::Metrics', metrics)
         client
-        expect(metrics).to have_received(:new).with(api_key: api_key, host: host, verbose: true)
+        expect(metrics).to have_received(:new).with(api_key: api_key, host: host, verbose: true, app: nil)
+      end
+    end
+
+    context 'with an app' do
+      subject(:client) { described_class.new(api_key: api_key, host: host, app: 'api') }
+
+      it 'passes app to HttpLogSync' do
+        http_log_sync = class_spy(Logdash::HttpLogSync)
+        stub_const('Logdash::HttpLogSync', http_log_sync)
+        client
+        expect(http_log_sync).to have_received(:new).with(api_key: api_key, host: host, verbose: false, app: 'api')
+      end
+
+      it 'passes app to Metrics' do
+        metrics = class_spy(Logdash::Metrics)
+        stub_const('Logdash::Metrics', metrics)
+        client
+        expect(metrics).to have_received(:new).with(api_key: api_key, host: host, verbose: false, app: 'api')
       end
     end
 

@@ -8,7 +8,8 @@ RSpec.describe Logdash::HttpLogSync do
   let(:api_key) { 'test_api_key' }
   let(:host) { 'https://api.logdash.com' }
   let(:verbose) { false }
-  let(:log_sync) { described_class.new(api_key: api_key, host: host, verbose: verbose) }
+  let(:app) { nil }
+  let(:log_sync) { described_class.new(api_key: api_key, host: host, verbose: verbose, app: app) }
 
   describe '#send' do
     let(:message) { 'Test log message' }
@@ -57,6 +58,38 @@ RSpec.describe Logdash::HttpLogSync do
 
       expect(a_request(:post, "#{host}/logs")
         .with(body: expected_body)).to have_been_made.once
+    end
+
+    it 'does not send app when it is not set' do
+      log_sync.send(message, level, created_at)
+      sleep 0.01
+
+      expect(a_request(:post, "#{host}/logs")
+        .with { |request| !JSON.parse(request.body).key?('app') }).to have_been_made.once
+    end
+
+    context 'when app is set' do
+      let(:app) { 'desktop' }
+
+      it 'sends app in the payload body' do
+        log_sync.send(message, level, created_at)
+        sleep 0.01
+
+        expect(a_request(:post, "#{host}/logs")
+          .with(body: hash_including(app: 'desktop'))).to have_been_made.once
+      end
+    end
+
+    context 'when app is empty' do
+      let(:app) { '' }
+
+      it 'does not send app' do
+        log_sync.send(message, level, created_at)
+        sleep 0.01
+
+        expect(a_request(:post, "#{host}/logs")
+          .with { |request| !JSON.parse(request.body).key?('app') }).to have_been_made.once
+      end
     end
 
     it 'sends the correct headers' do

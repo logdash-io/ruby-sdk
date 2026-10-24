@@ -49,7 +49,7 @@ logger.silly('Silly level logging')
 require 'logdash'
 
 logdash_client = Logdash.create(api_key: "YOUR_API_KEY")
-metrics = $logdash_client[:metrics]
+metrics = logdash_client[:metrics]
 
 metrics.set('users', 0)
 metrics.mutate('users', 1)
@@ -78,6 +78,19 @@ This will make `$logger` and `$metrics` available throughout your Ruby on Rails 
 | `api_key` | no       | -       | Api key used to authorize against logdash servers. If you don't provide one, logs will be logged into local console only |
 | `host`    | no       | `https://api.logdash.io` | Custom API host, useful with self-hosted instances                                                                       |
 | `verbose` | no       | `false` | Useful for debugging purposes                                                                                            |
+| `app`     | no       | -       | Name of the app sending logs and metrics. See [Apps](#apps)                                                              |
+
+### Apps
+
+A domain key is shared by all apps of a domain, for example a desktop app, an API and a landing page.
+`app` names the app this client runs in, so the dashboard can filter logs and metrics by app:
+
+```ruby
+logdash_client = Logdash.create(api_key: "YOUR_DOMAIN_KEY", app: "api")
+```
+
+Logdash creates the app on first use.
+Older service keys ignore `app`.
 
 ## View
 

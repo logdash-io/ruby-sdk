@@ -11,7 +11,7 @@ logdash_version = Gem.loaded_specs['logdash']&.version || 'unknown'
 puts "Using logdash gem version: #{logdash_version}"
 puts
 
-api_key = ENV['LOGDASH_API_KEY']
+api_key = ENV.fetch('LOGDASH_API_KEY', nil)
 puts "Using API Key: #{api_key}"
 logdash = Logdash.create(api_key: api_key, verbose: true)
 logger = logdash[:logger]
@@ -22,4 +22,4 @@ logger.error('This is an error log')
 metrics.set('demo_users', 42)
 metrics.mutate('demo_counter', 1)
 
-sleep 1 
+sleep 1

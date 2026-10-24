@@ -6,10 +6,11 @@ require 'json'
 
 module Logdash
   class HttpLogSync
-    def initialize(api_key:, host:, verbose:)
+    def initialize(api_key:, host:, verbose:, app: nil)
       @api_key = api_key
       @host = host
       @verbose = verbose
+      @app = app
       @sequence_number = 0
       @sequence_mutex = Mutex.new
     end
@@ -52,12 +53,9 @@ module Logdash
       request = Net::HTTP::Post.new(uri.request_uri)
       request['Content-Type'] = 'application/json'
       request['project-api-key'] = @api_key
-      request.body = {
-        message: message,
-        level: level,
-        createdAt: created_at,
-        sequenceNumber: sequence_number
-      }.to_json
+      body = { message: message, level: level, createdAt: created_at, sequenceNumber: sequence_number }
+      body[:app] = @app if @app && !@app.empty?
+      request.body = body.to_json
       request
     end
 
