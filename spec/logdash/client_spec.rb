@@ -23,6 +23,10 @@ RSpec.describe Logdash::Client do
         expect(client.metrics).to be_a(Logdash::Metrics)
       end
 
+      it 'initializes Events' do
+        expect(client.events).to be_a(Logdash::Events)
+      end
+
       it 'passes verbose true to HttpLogSync' do
         http_log_sync = class_spy(Logdash::HttpLogSync)
         stub_const('Logdash::HttpLogSync', http_log_sync)
@@ -53,6 +57,13 @@ RSpec.describe Logdash::Client do
         stub_const('Logdash::Metrics', metrics)
         client
         expect(metrics).to have_received(:new).with(api_key: api_key, host: host, verbose: false, app: 'api')
+      end
+
+      it 'passes app to Events' do
+        events = class_spy(Logdash::Events)
+        stub_const('Logdash::Events', events)
+        client
+        expect(events).to have_received(:new).with(api_key: api_key, host: host, verbose: false, app: 'api')
       end
     end
 
@@ -95,6 +106,10 @@ RSpec.describe Logdash::Client do
 
       it 'contains a Metrics' do
         expect(services[:metrics]).to be_a(Logdash::Metrics)
+      end
+
+      it 'contains Events' do
+        expect(services[:events]).to be_a(Logdash::Events)
       end
 
       it 'configures Logger with HttpLogSync' do

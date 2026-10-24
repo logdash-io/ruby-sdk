@@ -12,8 +12,7 @@ RSpec.describe Logdash::Logger do
     end
   end
 
-  Logdash::Types::LogLevel.constants.each do |level_const_sym|
-    level_value = Logdash::Types::LogLevel.const_get(level_const_sym)
+  Logdash::Types::LogLevel.constants.map { |sym| Logdash::Types::LogLevel.const_get(sym) }.each do |level_value|
     describe "##{level_value}" do
       it "logs a message with level #{level_value}" do
         expect { logger.public_send(level_value, 'test message') }.to output.to_stdout
