@@ -1,24 +1,35 @@
 name: Check deployed package
 
+# The gem installs from RubyGems and what it sends arrives. CI runs it after each release against the version it
+# published; run it by hand on any branch for the latest or any other version.
 on:
-  push:
-    branches:
-      - main
-      - add-demo-section
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+    secrets:
+      LOGDASH_API_KEY:
+        required: true
+      LOGDASH_PERSONAL_API_KEY:
+        required: true
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to check, the latest when empty
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
   run-demo:
     name: Run LogDash Demo
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Make run script executable
-        run: chmod +x demo/run.sh
-
-      - name: Run LogDash demo
+      - uses: actions/checkout@v7
+      - run: ./demo/run.sh
         env:
+          LOGDASH_VERSION: ${{ inputs.version }}
           LOGDASH_API_KEY: ${{ secrets.LOGDASH_API_KEY }}
-        run: ./demo/run.sh
+          LOGDASH_PERSONAL_API_KEY: ${{ secrets.LOGDASH_PERSONAL_API_KEY }}

@@ -2,24 +2,17 @@
 # frozen_string_literal: true
 
 require 'logdash'
-require 'rubygems'
 
-puts '=== LogDash SDK Demo ==='
+seed = ENV.fetch('LOGDASH_SEED')
+puts "=== LogDash SDK Demo: logdash #{Logdash::VERSION}, seed #{seed} ==="
 
-# Get and display the logdash gem version
-logdash_version = Gem.loaded_specs['logdash']&.version || 'unknown'
-puts "Using logdash gem version: #{logdash_version}"
-puts
-
-api_key = ENV.fetch('LOGDASH_API_KEY', nil)
-puts "Using API Key: #{api_key}"
-logdash = Logdash.create(api_key: api_key, verbose: true)
+logdash = Logdash.create(api_key: ENV.fetch('LOGDASH_API_KEY'), app: 'ruby-sdk', verbose: true)
 logger = logdash[:logger]
 metrics = logdash[:metrics]
 
-logger.info('This is an info log')
-logger.error('This is an error log')
-metrics.set('demo_users', 42)
-metrics.mutate('demo_counter', 1)
-
-sleep 1
+# Each call returns the thread that sends it, which Ruby kills when the script ends, so the script waits for them.
+# run.sh reads back a log of every level and demo_users at seed + 1, so the mutate goes out after the set arrived.
+levels = %w[info error warn debug verbose http silly]
+levels.map { |level| logger.public_send(level, 'smoke test', seed) }.each(&:join)
+metrics.set('demo_users', seed.to_i).join
+metrics.mutate('demo_users', 1).join
